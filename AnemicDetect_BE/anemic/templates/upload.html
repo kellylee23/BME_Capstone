@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>이미지 업로드</title>
+  </head>
+  <body>
+    <h2>손톱 이미지 업로드</h2>
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <input type="file" name="image" required />
+      <button type="submit">전처리 시작</button>
+    </form>
+  </body>
+</html>

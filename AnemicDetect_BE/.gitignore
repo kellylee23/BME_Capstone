@@ -1,0 +1,12 @@
+.venv
+venv/
+.idea
+db.sqlite3
+db.sqlite3-shm
+db.sqlite3-wal
+
+settings.py
+__pycache__
+media
+
+ngrok.yml

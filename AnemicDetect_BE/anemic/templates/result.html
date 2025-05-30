@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>결과 보기</title>
+  </head>
+  <body>
+    <h2>전처리 결과</h2>
+    {% if images %} {% for img in images %}
+    <div>
+      <img src="{{ img }}" style="width: 200px; margin: 10px" />
+    </div>
+    {% endfor %} {% else %}
+    <p>마스크가 없거나 실패했습니다.</p>
+    {% endif %}
+    <a href="/">다시 업로드하기</a>
+  </body>
+</html>
