@@ -53,5 +53,6 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('anemic.urls')),  # anemic 앱의 URL 포함
+    # path('api/', include('anemic.urls')), 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

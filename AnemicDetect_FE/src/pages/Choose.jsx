@@ -10,21 +10,21 @@ function Choose() {
       <Info>원하는 방식을 선택해주세요.</Info>
       <Btn
         onClick={() => {
-          navigate("/camera/both");
+          navigate("/upload/both");
         }}
       >
         결막 + 손톱
       </Btn>
       <Btn
         onClick={() => {
-          navigate("/camera/eye");
+          navigate("/upload/eye");
         }}
       >
         only 결막
       </Btn>
       <Btn
         onClick={() => {
-          navigate("/camera/nail");
+          navigate("/upload/nail");
         }}
       >
         only 손톱

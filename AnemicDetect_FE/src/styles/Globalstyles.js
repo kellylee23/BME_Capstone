@@ -2,11 +2,11 @@ import { createGlobalStyle } from "styled-components";
 import styled from "styled-components";
 
 const GlobalStyle = createGlobalStyle`
-  @font-face {
-    font-family: 'Noto Sans KR';
-    src: url('/fonts/NotoSansKR-VariableFont_wght.ttf') format('truetype');
+  /* @font-face {
+    font-family: 'Noto Sans';
+    src: url('/fonts/NotoSans-VariableFont_wght.ttf') format('truetype');
     font-style: normal;
-  }
+  } */
 
     * {
     margin: 0;
@@ -37,8 +37,8 @@ body {
     font-family: 'Noto Sans KR';
     width: 100%;
     height: 100%;
-    overflow-x: hidden;
-    overflow-y: hidden;
+    /* overflow-x: hidden; */
+    /* overflow-y: hidden; */
   }
 
   .app-container {
