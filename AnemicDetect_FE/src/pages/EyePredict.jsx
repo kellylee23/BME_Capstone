@@ -26,23 +26,39 @@ const Title = styled.h2`
 
 const ResultItem = styled.div`
   display: flex;
+  flex-direction: column;
   align-items: center;
-  margin-bottom: 20px;
-  background-color: #f2f4f7;
-  padding: 12px;
-  border-radius: 10px;
+  background: linear-gradient(135deg, #f0f4ff, #d9e4ff);
+  padding: 20px 24px;
+  margin-bottom: 30px;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 45, 86, 0.15);
+  max-width: 360px;
+  width: 90%;
 `;
 
 const Image = styled.img`
-  width: 100px;
+  width: 160px;
   height: auto;
-  border-radius: 8px;
-  margin-right: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  object-fit: cover;
 `;
 
 const Prediction = styled.p`
   font-size: 18px;
-  color: #333;
+  color: #1a1a1a;
+  text-align: center;
+  font-weight: 600;
+
+  &.explanation {
+    font-size: 14px;
+    color: #555a6e;
+    font-weight: 400;
+    margin-top: 12px;
+    line-height: 1.4;
+  }
 `;
 
 const EmptyMessage = styled.p`
@@ -63,6 +79,14 @@ const Button = styled.button`
   &:hover {
     background-color: rgba(0, 45, 86, 0.7);
   }
+`;
+
+const GuideText = styled.p`
+  font-size: 14px;
+  color: #555;
+  margin: 80px 0 20px 0;
+  text-align: center;
+  line-height: 1.4;
 `;
 
 const EyePredict = () => {
@@ -127,17 +151,47 @@ const EyePredict = () => {
       ) : results.length > 0 ? (
         <>
           <Title>분석 결과</Title>
-          {results.map((res, idx) => (
-            <ResultItem key={idx}>
-              <Image src={res.imageUrl} alt={`conj-${idx}`} />
-              <Prediction>
-                예측 결과: {res.prediction?.label_name ?? "예측 실패"}
-                <br />
-                빈혈일 확률이 {res.prediction?.probability ?? "N/A"} % 입니다.
-              </Prediction>
+          {results.map((res, index) => (
+            <ResultItem key={index}>
+              {res.prediction.label_name === "Anemic" &&
+              res.prediction.gradcam_image ? (
+                <>
+                  <Image
+                    src={res.prediction.gradcam_image}
+                    alt="Grad-CAM result"
+                  />
+                  <Prediction>
+                    예측 결과: {res.prediction.label_name}
+                    <br />
+                    빈혈일 확률이 {res.prediction.probability} % 입니다.
+                  </Prediction>
+                  <Prediction className="explanation">
+                    AI가 예측할 때 집중한 부위를 시각화한 이미지입니다. 빨간색에
+                    가까운 영역일수록 AI가 중요하게 판단한 부위입니다. 이
+                    시각화를 통해 AI가 어떤 근거로 '빈혈'로 판단했는지 확인할 수
+                    있습니다.
+                  </Prediction>
+                </>
+              ) : (
+                <>
+                  <Image src={res.imageUrl} alt="Original nail" />
+                  <Prediction>
+                    예측 결과: {res.prediction.label_name}
+                    <br />
+                    빈혈일 확률이 {res.prediction.probability} % 입니다.
+                  </Prediction>
+                </>
+              )}
             </ResultItem>
           ))}
           <Button onClick={() => navigate("/")}>처음으로</Button>
+          <GuideText>
+            이 시스템은 의료 전문 시스템이 아니므로, <br /> 위 정보는 참고
+            자료로 활용하시기 바랍니다. <br /> 반드시 전문의와 상담하여 정확한
+            진단과
+            <br />
+            치료를 받으시길 바랍니다.
+          </GuideText>
         </>
       ) : (
         <>
