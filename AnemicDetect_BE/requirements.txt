@@ -6,3 +6,7 @@ Pillow
 ultralytics
 opencv-python
 numpy
+timm
+django-ninja
+drf_yasg
+django-cors-headers
