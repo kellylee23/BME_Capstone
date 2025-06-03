@@ -26,6 +26,13 @@ const Card = styled.div`
   align-items: center;
   gap: 20px;
 `;
+const GuideText = styled.p`
+  font-size: 14px;
+  color: #555;
+  margin: 10px 0 20px 0;
+  text-align: center;
+  line-height: 1.4;
+`;
 
 const Title = styled.h2`
   font-size: 20px;
@@ -127,6 +134,11 @@ function UploadNail() {
     <Container>
       <Card>
         <Title>손톱 이미지 업로드</Title>
+        <GuideText>
+          손톱 사진을 선명하게 촬영해주세요. <br />
+          흰색 배경에서 손톱이 잘 보이도록 찍어주세요. <br />
+          최대 5MB까지 업로드 가능합니다.
+        </GuideText>
         {imgSrc ? (
           <>
             <PreviewImage src={imgSrc} alt="Preview" />

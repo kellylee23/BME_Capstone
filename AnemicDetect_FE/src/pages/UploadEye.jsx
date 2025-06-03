@@ -27,6 +27,14 @@ const Card = styled.div`
   gap: 20px;
 `;
 
+const GuideText = styled.p`
+  font-size: 14px;
+  color: #555;
+  margin: 10px 0 20px 0;
+  text-align: center;
+  line-height: 1.4;
+`;
+
 const Title = styled.h2`
   font-size: 20px;
   color: rgb(0, 45, 86);
@@ -127,6 +135,11 @@ function UploadEye() {
     <Container>
       <Card>
         <Title>결막 이미지 업로드</Title>
+        <GuideText>
+          결막 사진을 선명하게 촬영해주세요. <br />
+          촬영 시, 눈은 위쪽을 응시해주세요. <br />
+          최대 5MB까지 업로드 가능합니다.
+        </GuideText>
         {imgSrc ? (
           <>
             <PreviewImage src={imgSrc} alt="Preview" />

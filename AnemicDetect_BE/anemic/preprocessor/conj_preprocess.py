@@ -8,7 +8,7 @@ from uuid import uuid4
 from datetime import datetime
 
 # YOLO 모델 로딩
-MODEL_PATH = "anemic/models/best.pt"
+MODEL_PATH = "anemic/models/best_yolo_eye.pt"
 model = YOLO(MODEL_PATH)
 
 def crop_conj_and_save(file, save_dir="media/cropped_conj"):
