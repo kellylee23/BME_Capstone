@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import styled from "styled-components";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import ClipLoader from "react-spinners/ClipLoader";
 
 const Container = styled.div`
@@ -50,8 +50,24 @@ const EmptyMessage = styled.p`
   color: #999;
 `;
 
+const Button = styled.button`
+  display: block;
+  margin: 30px auto 0 auto;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 30px;
+  background-color: rgb(0, 45, 86);
+  color: white;
+  cursor: pointer;
+
+  &:hover {
+    background-color: rgba(0, 45, 86, 0.7);
+  }
+`;
+
 const EyePredict = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const croppedImages = location.state?.croppedImages || [];
 
   const [loading, setLoading] = useState(false);
@@ -114,12 +130,20 @@ const EyePredict = () => {
           {results.map((res, idx) => (
             <ResultItem key={idx}>
               <Image src={res.imageUrl} alt={`conj-${idx}`} />
-              <Prediction>예측 결과: {res.prediction.label_name}</Prediction>
+              <Prediction>
+                예측 결과: {res.prediction?.label_name ?? "예측 실패"}
+                <br />
+                빈혈일 확률이 {res.prediction?.probability ?? "N/A"} % 입니다.
+              </Prediction>
             </ResultItem>
           ))}
+          <Button onClick={() => navigate("/")}>처음으로</Button>
         </>
       ) : (
-        <EmptyMessage>결과가 없습니다.</EmptyMessage>
+        <>
+          <EmptyMessage>결과가 없습니다.</EmptyMessage>
+          <Button onClick={() => navigate("/")}>처음으로</Button>
+        </>
       )}
     </Container>
   );

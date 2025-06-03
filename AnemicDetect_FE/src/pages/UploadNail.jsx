@@ -158,9 +158,11 @@ function UploadNail() {
           </>
         )}
         <ResultButton
-          onClick={() => navigate("/result/nail", { state: { croppedImages } })}
+          onClick={() =>
+            navigate("/result/nail-preprocess", { state: { croppedImages } })
+          }
         >
-          결과 보기
+          전처리 결과 확인하기
         </ResultButton>
       </Card>
     </Container>

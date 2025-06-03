@@ -31,7 +31,10 @@ def predict_conjunctiva_image(image_path):
 
     with torch.no_grad():
         output = torch.sigmoid(model(image))
+        probability = output.item() 
         prediction = int(output.item() > 0.5)
 
     CLASS_NAMES = {0: "Non-Anemic", 1: "Anemic"}
-    return {"label_index": prediction, "label_name": CLASS_NAMES[prediction]}
+    return {"label_index": int(prediction),
+        "label_name": CLASS_NAMES[int(prediction)],
+        "probability": round(probability * 100, 3)}

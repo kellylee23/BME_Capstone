@@ -159,9 +159,11 @@ function UploadEye() {
           </>
         )}
         <ResultButton
-          onClick={() => navigate("/result/eye", { state: { croppedImages } })}
+          onClick={() =>
+            navigate("/result/eye-preprocess", { state: { croppedImages } })
+          }
         >
-          결과 보기
+          전처리 결과 확인하기
         </ResultButton>
       </Card>
     </Container>

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import styled from "styled-components";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import ClipLoader from "react-spinners/ClipLoader";
 
 const Container = styled.div`
@@ -22,8 +22,21 @@ const Container = styled.div`
 const Title = styled.h2`
   font-size: 26px;
   color: rgb(0, 45, 86);
-  margin-bottom: 30px;
-  margin-top: 40px;
+  margin: 40px 0 30px;
+`;
+
+const ImageGrid = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 20px;
+`;
+
+const PreviewImage = styled.img`
+  width: 150px;
+  height: auto;
+  border-radius: 8px;
 `;
 
 const ResultItem = styled.div`
@@ -36,7 +49,7 @@ const ResultItem = styled.div`
 `;
 
 const Image = styled.img`
-  width: 100px;
+  width: 150px;
   height: auto;
   border-radius: 8px;
   margin-right: 20px;
@@ -52,23 +65,52 @@ const EmptyMessage = styled.p`
   color: #999;
 `;
 
+const Button = styled.button`
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: rgb(0, 45, 86);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  margin: 20px 0;
+  cursor: pointer;
+
+  &:hover {
+    background-color: rgb(0, 30, 60);
+  }
+`;
+
+const LoaderWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+`;
+
+const ResetButton = styled.button`
+  display: block;
+  margin: 30px auto 0 auto;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 30px;
+  background-color: rgb(0, 45, 86);
+  color: white;
+  cursor: pointer;
+
+  &:hover {
+    background-color: rgba(0, 45, 86, 0.7);
+  }
+`;
 const BothPredictPage = () => {
   const location = useLocation();
-  console.log("location.state:", location.state);
-
+  const navigate = useNavigate();
   const eyeImages = location.state?.eyeCrops || [];
   const nailImages = location.state?.nailCrops || [];
 
   const [loading, setLoading] = useState(false);
   const [eyeResults, setEyeResults] = useState([]);
   const [nailResults, setNailResults] = useState([]);
-  useEffect(() => {
-    console.log("eyeImages:", eyeImages);
-    console.log("nailImages:", nailImages);
-    if (eyeImages.length > 0 || nailImages.length > 0) {
-      classifyAllImages();
-    }
-  }, [eyeImages, nailImages]);
+  const [analysisStarted, setAnalysisStarted] = useState(false);
 
   const classifyImages = async (images, apiEndpoint, fileName) => {
     const results = [];
@@ -94,7 +136,7 @@ const BothPredictPage = () => {
       } catch (err) {
         console.error("예측 실패:", err);
         results.push({
-          prediction: { label_name: "예측 실패" },
+          prediction: { label_name: "예측 실패", probability: null },
           imageUrl: base64ImageUrl,
         });
       }
@@ -104,6 +146,7 @@ const BothPredictPage = () => {
 
   const classifyAllImages = async () => {
     setLoading(true);
+    setAnalysisStarted(true);
 
     const [eyeRes, nailRes] = await Promise.all([
       classifyImages(eyeImages, "/api/conj-classify/", "conj.jpg"),
@@ -112,51 +155,103 @@ const BothPredictPage = () => {
 
     setEyeResults(eyeRes);
     setNailResults(nailRes);
-
     setLoading(false);
   };
 
   return (
     <Container>
-      {loading ? (
+      {!analysisStarted ? (
         <>
+          <Title>전처리 결과</Title>
+
+          {eyeImages.length > 0 && (
+            <>
+              <h3>눈 부위</h3>
+              <ImageGrid>
+                {eyeImages.map((img, idx) => (
+                  <PreviewImage
+                    key={`eye-${idx}`}
+                    src={img}
+                    alt={`eye-${idx}`}
+                  />
+                ))}
+              </ImageGrid>
+            </>
+          )}
+
+          {nailImages.length > 0 && (
+            <>
+              <h3>손톱 부위</h3>
+              <ImageGrid>
+                {nailImages.map((img, idx) => (
+                  <PreviewImage
+                    key={`nail-${idx}`}
+                    src={img}
+                    alt={`nail-${idx}`}
+                  />
+                ))}
+              </ImageGrid>
+            </>
+          )}
+
+          <Button onClick={classifyAllImages}>분석 시작</Button>
+        </>
+      ) : loading ? (
+        <LoaderWrapper>
           <ClipLoader size={60} color="rgb(0, 45, 86)" />
           <p style={{ marginTop: "20px", color: "#555" }}>
             결과를 분석하는 중 입니다...
           </p>
-        </>
+        </LoaderWrapper>
       ) : eyeResults.length > 0 || nailResults.length > 0 ? (
-        <>
-          {eyeResults.length > 0 && (
-            <>
-              <Title>눈 부위 분석 결과</Title>
-              {eyeResults.map((res, idx) => (
-                <ResultItem key={`eye-${idx}`}>
-                  <Image src={res.imageUrl} alt={`eye-${idx}`} />
-                  <Prediction>
-                    예측 결과: {res.prediction.label_name}
-                  </Prediction>
-                </ResultItem>
-              ))}
-            </>
-          )}
+        (() => {
+          // 결과 합치기
+          const allResults = [
+            ...eyeResults.map((r) => ({ ...r, type: "eye" })),
+            ...nailResults.map((r) => ({ ...r, type: "nail" })),
+          ];
 
-          {nailResults.length > 0 && (
+          // 확률이 있는 결과만 필터링
+          const filtered = allResults.filter(
+            (res) => res.prediction && res.prediction.probability !== undefined
+          );
+
+          // 최고 확률 결과 찾기
+          const bestResult = filtered.reduce(
+            (best, curr) =>
+              parseFloat(curr.prediction.probability) >
+              parseFloat(best.prediction.probability)
+                ? curr
+                : best,
+            filtered[0]
+          );
+
+          return (
             <>
-              <Title>손톱 부위 분석 결과</Title>
-              {nailResults.map((res, idx) => (
-                <ResultItem key={`nail-${idx}`}>
-                  <Image src={res.imageUrl} alt={`nail-${idx}`} />
-                  <Prediction>
-                    예측 결과: {res.prediction.label_name}
-                  </Prediction>
-                </ResultItem>
-              ))}
+              <Title>
+                {/* {bestResult.type === "eye"
+                  ? "눈 부위 분석 결과"
+                  : "손톱 부위 분석 결과"} */}
+                최종 분석 결과
+              </Title>
+              <ResultItem>
+                <Image src={bestResult.imageUrl} alt="best" />
+                <Prediction>
+                  예측 결과: {bestResult.prediction.label_name}
+                  <br />
+                  빈혈일 확률이 {bestResult.prediction.probability ?? "N/A"} %
+                  입니다.
+                </Prediction>
+              </ResultItem>
+              <ResetButton onClick={() => navigate("/")}>처음으로</ResetButton>
             </>
-          )}
-        </>
+          );
+        })()
       ) : (
-        <EmptyMessage>결과가 없습니다.</EmptyMessage>
+        <>
+          <EmptyMessage>결과가 없습니다.</EmptyMessage>
+          <ResetButton onClick={() => navigate("/")}>처음으로</ResetButton>
+        </>
       )}
     </Container>
   );

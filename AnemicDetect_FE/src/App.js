@@ -18,6 +18,9 @@ import BothPredictPage from "./pages/BothPredict";
 import UploadNail from "./pages/UploadNail";
 import UploadEye from "./pages/UploadEye";
 import UploadBoth from "./pages/UploadBoth";
+
+import ResultPreNail from "./pages/NailPreprocessResult";
+import ResultPreEye from "./pages/EyePreprocessResult";
 // import Webcam from "react-webcam";
 // import styled from "styled-components";
 
@@ -45,6 +48,10 @@ function App() {
 
           {/* 캡쳐화면 */}
           <Route path="/capture" element={<Capture />} />
+
+          {/* 전처리 결과 */}
+          <Route path="/result/nail-preprocess" element={<ResultPreNail />} />
+          <Route path="/result/eye-preprocess" element={<ResultPreEye />} />
 
           {/* 결과 페이지 */}
           <Route path="/result" element={<Result />} />
