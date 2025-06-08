@@ -62,7 +62,7 @@ function Main() {
   return (
     <Container>
       <TextTypingAni text={"Do I Look\n Pale?"} />
-      <SubTitle>이미지 기반 비침습적 빈혈 스크리닝 시스템</SubTitle>
+      <SubTitle>이미지 기반 빈혈 스크리닝 시스템</SubTitle>
       <StartBtn onClick={handleOnClick}>start</StartBtn>
     </Container>
   );

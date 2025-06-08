@@ -63,18 +63,19 @@ def nail_classify(request, image: UploadedFile = File(...)):
         "prediction": result,
         "image_url": full_url
     }
-
-    # 5. Anemic이면 Grad-CAM 실행
-    if result["label_name"] == "Anemic":
-        gradcam_path = run_gradcam(save_path)
-
-        # Grad-CAM 결과 이미지 URL 생성
-        gradcam_url = request.build_absolute_uri(
-            os.path.join(settings.MEDIA_URL, os.path.relpath(gradcam_path, settings.MEDIA_ROOT)).replace("\\", "/")
-        )
-        response["gradcam_image"] = gradcam_url
-
     return response
+
+    # # 5. Anemic이면 Grad-CAM 실행
+    # if result["label_name"] == "Anemic":
+    #     gradcam_path = run_gradcam(save_path)
+
+    #     # Grad-CAM 결과 이미지 URL 생성
+    #     gradcam_url = request.build_absolute_uri(
+    #         os.path.join(settings.MEDIA_URL, os.path.relpath(gradcam_path, settings.MEDIA_ROOT)).replace("\\", "/")
+    #     )
+    #     response["gradcam_image"] = gradcam_url
+
+    # return response
 
 # 전처리 conj-post
 @router.post("conj-preprocess/")
@@ -131,15 +132,15 @@ def conj_classify(request, image: UploadedFile = File(...)):
         "image_url": full_url
     }
 
-    # 5. Anemic이면 Grad-CAM 실행
-    if result["label_name"] == "Anemic":
-        gradcam_dir = os.path.join(settings.MEDIA_ROOT, "gradcam_conj")
-        os.makedirs(gradcam_dir, exist_ok=True)  # 디렉토리 없으면 생성
-        gradcam_path = run_gradcam(save_path, gradcam_dir)
+    # # 5. Anemic이면 Grad-CAM 실행
+    # if result["label_name"] == "Anemic":
+    #     gradcam_dir = os.path.join(settings.MEDIA_ROOT, "gradcam_conj")
+    #     os.makedirs(gradcam_dir, exist_ok=True)  # 디렉토리 없으면 생성
+    #     gradcam_path = run_gradcam(save_path, gradcam_dir)
 
-        # Grad-CAM 결과 이미지 URL 생성
-        gradcam_url = request.build_absolute_uri(
-            os.path.join(settings.MEDIA_URL, os.path.relpath(gradcam_path, settings.MEDIA_ROOT)).replace("\\", "/")
-        )
-        response["gradcam_image"] = gradcam_url
+    #     # Grad-CAM 결과 이미지 URL 생성
+    #     gradcam_url = request.build_absolute_uri(
+    #         os.path.join(settings.MEDIA_URL, os.path.relpath(gradcam_path, settings.MEDIA_ROOT)).replace("\\", "/")
+    #     )
+    #     response["gradcam_image"] = gradcam_url
     return response

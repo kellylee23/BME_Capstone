@@ -94,7 +94,9 @@ const NailPredict = () => {
   const croppedImages = location.state?.croppedImages || [];
 
   const [loading, setLoading] = useState(false);
-  const [bestResult, setBestResult] = useState(null);
+  const [best, setBest] = useState(null);
+  const [avgProb, setAvgProb] = useState(0); // 변수명 간단히
+  const [finalLabel, setFinalLabel] = useState(null);
 
   useEffect(() => {
     if (croppedImages.length > 0) {
@@ -106,7 +108,9 @@ const NailPredict = () => {
     setLoading(true);
     const results = [];
 
-    for (let base64ImageUrl of croppedImages) {
+    const uniqueImages = Array.from(new Set(croppedImages));
+
+    for (let base64ImageUrl of uniqueImages) {
       try {
         const blob = await (await fetch(base64ImageUrl)).blob();
         const file = new File([blob], "nail.jpg", { type: "image/jpeg" });
@@ -137,19 +141,31 @@ const NailPredict = () => {
       }
     }
 
-    const getAnemicProb = (prediction) => {
-      const prob = parseFloat(prediction.probability || 0);
-      return prediction.label_name === "Anemic" ? prob : 1 - prob;
-    };
+    const allProbs = results.map((r) =>
+      parseFloat(r.prediction.probability || 0)
+    );
+    console.log(allProbs);
+
+    const avg = allProbs.length
+      ? allProbs.reduce((sum, p) => sum + p, 0) / allProbs.length
+      : 0;
+    console.log(avg);
 
     const best = results.reduce((prev, curr) => {
-      const prevProb = getAnemicProb(prev.prediction);
-      const currProb = getAnemicProb(curr.prediction);
+      const prevProb = parseFloat(prev.prediction.probability || 0);
+      const currProb = parseFloat(curr.prediction.probability || 0);
       return currProb > prevProb ? curr : prev;
     });
-    setBestResult(best);
+
+    best.prob = parseFloat(best.prediction.probability || 0); // prob 추가
+
+    setBest(best);
+    setAvgProb(avg);
+    setFinalLabel(best.prediction.label_name);
     setLoading(false);
   };
+
+  // ✅ 이게 실제로 화면에 보이는 JSX
   return (
     <Container>
       {loading ? (
@@ -159,38 +175,16 @@ const NailPredict = () => {
             결과를 분석하는 중 입니다...
           </p>
         </>
-      ) : bestResult ? (
+      ) : best ? (
         <>
           <Title>분석 결과</Title>
           <ResultItem>
-            {bestResult.prediction.label_name === "Anemic" &&
-            bestResult.prediction.gradcam_image ? (
-              <>
-                <Image
-                  src={bestResult.prediction.gradcam_image}
-                  alt="Grad-CAM result"
-                />
-                <Prediction>
-                  예측 결과: {bestResult.prediction.label_name}
-                  <br />
-                  빈혈일 확률이 {bestResult.prediction.probability} % 입니다.
-                </Prediction>
-                <Prediction className="explanation">
-                  AI가 예측할 때 집중한 부위를 시각화한 이미지입니다. 빨간색에
-                  가까운 영역일수록 AI가 중요하게 판단한 부위입니다. 이 시각화를
-                  통해 AI가 어떤 근거로 '빈혈'로 판단했는지 확인할 수 있습니다.
-                </Prediction>
-              </>
-            ) : (
-              <>
-                <Image src={bestResult.imageUrl} alt="Original nail" />
-                <Prediction>
-                  예측 결과: {bestResult.prediction.label_name}
-                  <br />
-                  빈혈일 확률이 {bestResult.prediction.probability} % 입니다.
-                </Prediction>
-              </>
-            )}
+            <Prediction>
+              예측 결과: {best.prediction.label_name}
+              <br />
+              빈혈일 확률이 {avgProb.toFixed(2)}% 입니다.
+              <br />
+            </Prediction>
           </ResultItem>
 
           <Button onClick={() => navigate("/")}>처음으로</Button>

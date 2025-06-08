@@ -8,26 +8,26 @@ function Choose() {
   return (
     <Container>
       <Info>원하는 방식을 선택해주세요.</Info>
-      <Btn
+      {/* <Btn
         onClick={() => {
           navigate("/upload/both");
         }}
       >
         결막 + 손톱
-      </Btn>
+      </Btn> */}
       <Btn
         onClick={() => {
           navigate("/upload/eye");
         }}
       >
-        only 결막
+        결막
       </Btn>
       <Btn
         onClick={() => {
           navigate("/upload/nail");
         }}
       >
-        only 손톱
+        손톱
       </Btn>
     </Container>
   );
@@ -56,6 +56,7 @@ const Info = styled.div`
   font-weight: 600;
   color: white;
   margin-top: 100px;
+  margin-bottom: 100px;
 `;
 
 const ButtonDiv = styled.button`
@@ -67,12 +68,13 @@ const ButtonDiv = styled.button`
 const Btn = styled.button`
   width: 150px;
   height: 65px;
+
   margin: 25px;
   color: white;
   background-color: rgba(252, 252, 252, 0.6);
   border: none;
   border-radius: 50px;
-  font-size: 16px;
+  font-size: 18px;
   font-family: "Noto Sans", sans-serif;
   font-weight: 600;
   &:hover {

@@ -221,61 +221,70 @@ const BothPredictPage = () => {
         </LoaderWrapper>
       ) : eyeResults.length > 0 || nailResults.length > 0 ? (
         (() => {
-          // 결과 합치기
           const allResults = [
             ...eyeResults.map((r) => ({ ...r, type: "eye" })),
             ...nailResults.map((r) => ({ ...r, type: "nail" })),
           ];
 
-          // 확률이 있는 결과만 필터링
           const filtered = allResults.filter(
             (res) => res.prediction && res.prediction.probability !== undefined
           );
 
-          // 최고 확률 결과 찾기
-          const bestResult = filtered.reduce(
-            (best, curr) =>
-              parseFloat(curr.prediction.probability) >
-              parseFloat(best.prediction.probability)
-                ? curr
-                : best,
-            filtered[0]
-          );
+          const MODEL_WEIGHTS = {
+            eye: 0.963,
+            nail: 0.893,
+          };
+
+          const eyeProbs = filtered
+            .filter((r) => r.type === "eye")
+            .map((r) => parseFloat(r.prediction.probability));
+
+          const nailProbs = filtered
+            .filter((r) => r.type === "nail")
+            .map((r) => parseFloat(r.prediction.probability));
+
+          const avgNailProb = nailProbs.length
+            ? nailProbs.reduce((sum, p) => sum + p, 0) / nailProbs.length
+            : null;
+
+          const avgEyeProb = eyeProbs.length
+            ? eyeProbs.reduce((sum, p) => sum + p, 0) / eyeProbs.length
+            : null;
+
+          const useNail = avgNailProb !== null;
+          const useEye = avgEyeProb !== null;
+
+          let finalProb = null;
+
+          if (useNail && useEye) {
+            finalProb =
+              (MODEL_WEIGHTS.nail * avgNailProb +
+                MODEL_WEIGHTS.eye * avgEyeProb) /
+              (MODEL_WEIGHTS.nail + MODEL_WEIGHTS.eye);
+          } else if (useNail) {
+            finalProb = avgNailProb;
+          } else if (useEye) {
+            finalProb = avgEyeProb;
+          }
+
+          const finalLabel = finalProb >= 0.5 ? "Anemic" : "Non-Anemic";
 
           return (
             <>
+              <Title>분석 결과</Title>
               <ResultItem>
-                {bestResult.prediction.label_name === "Anemic" &&
-                bestResult.prediction.gradcam_image ? (
-                  <>
-                    <Image
-                      src={bestResult.prediction.gradcam_image}
-                      alt="Grad-CAM result"
-                    />
-                    <Prediction>
-                      예측 결과: {bestResult.prediction.label_name}
-                      <br />
-                      빈혈일 확률이 {bestResult.prediction.probability} %
-                      입니다.
-                    </Prediction>
-                    <Prediction className="explanation">
-                      AI가 예측할 때 집중한 부위를 시각화한 이미지입니다.
-                      빨간색에 가까운 영역일수록 AI가 중요하게 판단한
-                      부위입니다. 이 시각화를 통해 AI가 어떤 근거로 '빈혈'로
-                      판단했는지 확인할 수 있습니다.
-                    </Prediction>
-                  </>
-                ) : (
-                  <>
-                    <Image src={bestResult.imageUrl} alt="Original nail" />
-                    <Prediction>
-                      예측 결과: {bestResult.prediction.label_name}
-                      <br />
-                      빈혈일 확률이 {bestResult.prediction.probability} %
-                      입니다.
-                    </Prediction>
-                  </>
-                )}
+                <Prediction>
+                  최종 예측: {finalLabel}
+                  <br />
+                  가중 평균 확률: {finalProb.toFixed(2)}%
+                </Prediction>
+                <Prediction className="explanation">
+                  {useNail && useEye
+                    ? "눈과 손톱 부위 모두 분석되었기 때문에, 각 모델의 정확도를 고려한 가중치 기반 예측 결과입니다."
+                    : useNail
+                    ? "손톱 이미지만 분석되어 해당 결과를 기반으로 예측되었습니다."
+                    : "눈 이미지만 분석되어 해당 결과를 기반으로 예측되었습니다."}
+                </Prediction>
               </ResultItem>
               <Button onClick={() => navigate("/")}>처음으로</Button>
             </>
