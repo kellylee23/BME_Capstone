@@ -48,7 +48,7 @@ def predict_nail_image(image_path):
         with torch.no_grad():
             output = torch.sigmoid(model(image))
             probability = output.item()
-            prediction = (probability > 0.7373)
+            prediction = (probability > 0.7602)
 
         CLASS_NAMES = {0: "Non-Anemic", 1: "Anemic"}
 

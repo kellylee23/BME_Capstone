@@ -139,6 +139,12 @@ const EyePredict = () => {
     setLoading(false);
   };
 
+  const calibratedProb = (rawProb, threshold) => {
+    return ((rawProb - threshold) / (1 - threshold)) * 0.5 + 0.5;
+  };
+
+  const threshold = 0.9387;
+
   return (
     <Container>
       {loading ? (
@@ -151,39 +157,24 @@ const EyePredict = () => {
       ) : results.length > 0 ? (
         <>
           <Title>분석 결과</Title>
-          {results.map((res, index) => (
-            <ResultItem key={index}>
-              {res.prediction.label_name === "Anemic" &&
-              res.prediction.gradcam_image ? (
-                <>
-                  <Image
-                    src={res.prediction.gradcam_image}
-                    alt="Grad-CAM result"
-                  />
-                  <Prediction>
-                    예측 결과: {res.prediction.label_name}
-                    <br />
-                    빈혈일 확률이 {res.prediction.probability} % 입니다.
-                  </Prediction>
-                  <Prediction className="explanation">
-                    AI가 예측할 때 집중한 부위를 시각화한 이미지입니다. 빨간색에
-                    가까운 영역일수록 AI가 중요하게 판단한 부위입니다. 이
-                    시각화를 통해 AI가 어떤 근거로 '빈혈'로 판단했는지 확인할 수
-                    있습니다.
-                  </Prediction>
-                </>
-              ) : (
-                <>
-                  <Image src={res.imageUrl} alt="Original nail" />
-                  <Prediction>
-                    예측 결과: {res.prediction.label_name}
-                    <br />
-                    빈혈일 확률이 {res.prediction.probability} % 입니다.
-                  </Prediction>
-                </>
-              )}
-            </ResultItem>
-          ))}
+          {results.map((res, index) => {
+            const raw = parseFloat(res.prediction.probability || 0);
+            const calibrated =
+              res.prediction.label_name === "예측 실패"
+                ? 0
+                : calibratedProb(raw, threshold).toFixed(2);
+
+            return (
+              <ResultItem key={index}>
+                <Image src={res.imageUrl} alt="Uploaded image" />
+                <Prediction>
+                  예측 결과: {res.prediction.label_name}
+                  <br />
+                  빈혈일 확률이 {calibrated} % 입니다.
+                </Prediction>
+              </ResultItem>
+            );
+          })}
           <Button onClick={() => navigate("/")}>처음으로</Button>
           <GuideText>
             이 시스템은 의료 전문 시스템이 아니므로, <br /> 위 정보는 참고
