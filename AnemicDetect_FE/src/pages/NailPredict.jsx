@@ -188,7 +188,7 @@ const NailPredict = () => {
             <Prediction>
               예측 결과: {best.prediction.label_name}
               <br />
-              빈혈일 확률이 {avgProb.toFixed(5)}% 입니다.
+              빈혈일 확률이 {avgProb.toFixed(4)}% 입니다.
               <br />
             </Prediction>
           </ResultItem>
