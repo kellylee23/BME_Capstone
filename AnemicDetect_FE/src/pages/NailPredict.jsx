@@ -104,6 +104,11 @@ const NailPredict = () => {
     }
   }, [croppedImages]);
 
+  const sigmoidLikeScaling = (raw_prob, threshold = 0.7602, sharpness = 10) => {
+    const x = (raw_prob - threshold) * sharpness;
+    return 1 / (1 + Math.exp(-x));
+  };
+
   const classifyAllImages = async () => {
     setLoading(true);
     const results = [];
@@ -141,30 +146,31 @@ const NailPredict = () => {
       }
     }
 
-    const allProbs = results.map((r) =>
-      parseFloat(r.prediction.probability || 0)
+    // ✅ 1. 개별 보정된 확률 계산
+    const calibratedProbs = results.map((r) =>
+      sigmoidLikeScaling(parseFloat(r.prediction.probability || 0))
     );
-    console.log(allProbs);
 
-    const avg = allProbs.length
-      ? allProbs.reduce((sum, p) => sum + p, 0) / allProbs.length
+    // ✅ 2. 보정된 확률 평균 계산
+    const avg = calibratedProbs.length
+      ? calibratedProbs.reduce((sum, p) => sum + p, 0) / calibratedProbs.length
       : 0;
-    console.log(avg);
 
+    // ✅ 3. 가장 확률 높은 결과(원본 확률 기준)는 그대로 사용
     const best = results.reduce((prev, curr) => {
       const prevProb = parseFloat(prev.prediction.probability || 0);
       const currProb = parseFloat(curr.prediction.probability || 0);
       return currProb > prevProb ? curr : prev;
     });
 
-    best.prob = parseFloat(best.prediction.probability || 0); // prob 추가
+    best.prob = parseFloat(best.prediction.probability || 0); // 원본 확률 기록
 
+    // ✅ 4. 상태 업데이트
     setBest(best);
-    setAvgProb(avg);
+    setAvgProb(avg); // 평균 보정된 확률
     setFinalLabel(best.prediction.label_name);
     setLoading(false);
   };
-
   // ✅ 이게 실제로 화면에 보이는 JSX
   return (
     <Container>
@@ -182,7 +188,7 @@ const NailPredict = () => {
             <Prediction>
               예측 결과: {best.prediction.label_name}
               <br />
-              빈혈일 확률이 {avgProb.toFixed(2)}% 입니다.
+              빈혈일 확률이 {avgProb.toFixed(5)}% 입니다.
               <br />
             </Prediction>
           </ResultItem>

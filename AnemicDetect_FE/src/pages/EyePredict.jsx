@@ -139,8 +139,9 @@ const EyePredict = () => {
     setLoading(false);
   };
 
-  const calibratedProb = (rawProb, threshold) => {
-    return ((rawProb - threshold) / (1 - threshold)) * 0.5 + 0.5;
+  const calibratedProb = (raw_prob, threshold) => {
+    const result = ((raw_prob - threshold) / (1 - threshold)) * 0.5 + 0.5;
+    return Math.min(Math.max(result, 0.0), 1.0);
   };
 
   const threshold = 0.9387;
